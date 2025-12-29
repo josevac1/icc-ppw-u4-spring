@@ -15,9 +15,9 @@ public interface UserService {
 
     UserResponseDto create(CreateUserDto dto);
 
-    Object update(int id, UpdateUserDto dto);
+    UserResponseDto update(int id, UpdateUserDto dto);
 
-    Object partialUpdate(int id, PartialUpdateUserDto dto);
+    UserResponseDto partialUpdate(int id, PartialUpdateUserDto dto);
 
-    Object delete(int id);
+    void delete(int id);
 }

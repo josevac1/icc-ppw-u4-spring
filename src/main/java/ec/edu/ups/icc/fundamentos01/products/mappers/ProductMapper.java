@@ -1,7 +1,7 @@
 package ec.edu.ups.icc.fundamentos01.products.mappers;
 
 import ec.edu.ups.icc.fundamentos01.products.dtos.ProductResponseDto;
-import ec.edu.ups.icc.fundamentos01.products.entities.Product;
+import ec.edu.ups.icc.fundamentos01.products.models.Product;
 
 public class ProductMapper {
 

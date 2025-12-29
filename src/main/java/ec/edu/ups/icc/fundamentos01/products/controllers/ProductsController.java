@@ -42,19 +42,19 @@ public class ProductsController {
 	}
 
 	@PutMapping("/{id}")
-	public Object update(@PathVariable("id") int id,
-	                     @RequestBody UpdateProductDto dto) {
+	public ProductResponseDto update(@PathVariable("id") int id,
+			@RequestBody UpdateProductDto dto) {
 		return service.update(id, dto);
 	}
 
 	@PatchMapping("/{id}")
-	public Object partialUpdate(@PathVariable("id") int id,
-	                            @RequestBody PartialUpdateProductDto dto) {
+	public ProductResponseDto partialUpdate(@PathVariable("id") int id,
+			@RequestBody PartialUpdateProductDto dto) {
 		return service.partialUpdate(id, dto);
 	}
 
 	@DeleteMapping("/{id}")
-	public Object delete(@PathVariable("id") int id) {
-		return service.delete(id);
+	public void delete(@PathVariable("id") int id) {
+		service.delete(id);
 	}
 }

@@ -1,31 +1,32 @@
 package ec.edu.ups.icc.fundamentos01.products.entities;
 
-import java.time.LocalDateTime;
+import jakarta.persistence.*;
+import ec.edu.ups.icc.fundamentos01.core.entities.BaseModel;
 
-public class Product {
+@Entity
+@Table(name = "products")
+public class ProductEntity extends BaseModel {
 
-    private int id;
+    @Column(nullable = false, length = 100)
     private String name;
-    private String description;
-    private Double price;
-    private String createdAt;
 
-    public Product(int id, String name, String description, Double price) {
-        this.id = id;
+    @Column(length = 500)
+    private String description;
+
+    @Column(nullable = false)
+    private Double price;
+
+    // ==================== CONSTRUCTORS ====================
+    public ProductEntity() {
+    }
+
+    public ProductEntity(String name, String description, Double price) {
         this.name = name;
         this.description = description;
         this.price = price;
-        this.createdAt = LocalDateTime.now().toString();
     }
 
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
+    // ==================== GETTERS AND SETTERS ====================
     public String getName() {
         return name;
     }
@@ -48,13 +49,5 @@ public class Product {
 
     public void setPrice(Double price) {
         this.price = price;
-    }
-
-    public String getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(String createdAt) {
-        this.createdAt = createdAt;
     }
 }

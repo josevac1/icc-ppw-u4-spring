@@ -44,19 +44,19 @@ public class UsersController {
     }
 
     @PutMapping("/{id}")
-    public Object update(@PathVariable("id") int id,
+    public UserResponseDto update(@PathVariable("id") int id,
                          @RequestBody UpdateUserDto dto) {
         return service.update(id, dto);
     }
 
     @PatchMapping("/{id}")
-    public Object partialUpdate(@PathVariable("id") int id,
+    public UserResponseDto partialUpdate(@PathVariable("id") int id,
                                 @RequestBody PartialUpdateUserDto dto) {
         return service.partialUpdate(id, dto);
     }
 
     @DeleteMapping("/{id}")
-    public Object delete(@PathVariable("id") int id) {
-        return service.delete(id);
+    public void delete(@PathVariable("id") int id) {
+        service.delete(id);
     }
 }

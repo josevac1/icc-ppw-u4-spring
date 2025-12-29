@@ -15,9 +15,9 @@ public interface ProductService {
 
     ProductResponseDto create(CreateProductDto dto);
 
-    Object update(int id, UpdateProductDto dto);
+    ProductResponseDto update(int id, UpdateProductDto dto);
 
-    Object partialUpdate(int id, PartialUpdateProductDto dto);
+    ProductResponseDto partialUpdate(int id, PartialUpdateProductDto dto);
 
-    Object delete(int id);
+    void delete(int id);
 }
