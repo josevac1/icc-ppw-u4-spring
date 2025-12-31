@@ -16,14 +16,18 @@ public class ProductEntity extends BaseModel {
     @Column(nullable = false)
     private Double price;
 
+    @Column(nullable = false)
+    private Integer stock;
+
     // ==================== CONSTRUCTORS ====================
     public ProductEntity() {
     }
 
-    public ProductEntity(String name, String description, Double price) {
+    public ProductEntity(String name, String description, Double price, Integer stock) {
         this.name = name;
         this.description = description;
         this.price = price;
+        this.stock = stock;
     }
 
     // ==================== GETTERS AND SETTERS ====================
@@ -49,5 +53,13 @@ public class ProductEntity extends BaseModel {
 
     public void setPrice(Double price) {
         this.price = price;
+    }
+
+    public Integer getStock() {
+        return stock;
+    }
+
+    public void setStock(Integer stock) {
+        this.stock = stock;
     }
 }

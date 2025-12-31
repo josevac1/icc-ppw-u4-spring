@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/users")
@@ -39,19 +40,19 @@ public class UsersController {
     }
 
     @PostMapping
-    public UserResponseDto create(@RequestBody CreateUserDto dto) {
+    public UserResponseDto create(@Valid @RequestBody CreateUserDto dto) {
         return service.create(dto);
     }
 
     @PutMapping("/{id}")
     public UserResponseDto update(@PathVariable("id") int id,
-                         @RequestBody UpdateUserDto dto) {
+                         @Valid @RequestBody UpdateUserDto dto) {
         return service.update(id, dto);
     }
 
     @PatchMapping("/{id}")
     public UserResponseDto partialUpdate(@PathVariable("id") int id,
-                                @RequestBody PartialUpdateUserDto dto) {
+                                @Valid @RequestBody PartialUpdateUserDto dto) {
         return service.partialUpdate(id, dto);
     }
 

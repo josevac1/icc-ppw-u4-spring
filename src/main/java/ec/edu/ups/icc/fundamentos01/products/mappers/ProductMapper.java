@@ -5,16 +5,14 @@ import ec.edu.ups.icc.fundamentos01.products.models.Product;
 
 public class ProductMapper {
 
-    public static Product toEntity(int id, String name, String description, Double price) {
-        return new Product(id, name, description, price != null ? price : 0.0);
-    }
-
     public static ProductResponseDto toResponse(Product product) {
         ProductResponseDto dto = new ProductResponseDto();
         dto.id = product.getId();
         dto.name = product.getName();
         dto.description = product.getDescription();
         dto.price = product.getPrice();
+        dto.stock = product.getStock();
+        dto.createdAt = product.getCreatedAt().toString();
         return dto;
     }
 }

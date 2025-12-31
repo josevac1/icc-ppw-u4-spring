@@ -38,8 +38,16 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ProductResponseDto create(CreateProductDto dto) {
-        ProductEntity entity = Product.fromDto(dto).toEntity();
-        ProductEntity saved = productRepo.save(entity);
+        
+        // Regla: nombre único
+        if (productRepo.findByName(dto.getName()).isPresent()) {
+            throw new IllegalStateException("El nombre del producto ya está registrado");
+        }
+
+        Product product = Product.fromDto(dto);
+
+        ProductEntity saved = productRepo.save(product.toEntity());
+
         return ProductMapper.toResponse(Product.fromEntity(saved));
     }
 
