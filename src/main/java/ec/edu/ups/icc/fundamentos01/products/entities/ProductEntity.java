@@ -16,8 +16,8 @@ public class ProductEntity extends BaseModel {
     @Column(nullable = false)
     private Double price;
 
-    @Column(nullable = false)
-    private Integer stock;
+    @Column(nullable = false, columnDefinition = "integer default 0")
+    private Integer stock = 0;
 
     // ==================== CONSTRUCTORS ====================
     public ProductEntity() {

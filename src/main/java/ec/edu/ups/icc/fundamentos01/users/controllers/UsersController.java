@@ -8,6 +8,8 @@ import ec.edu.ups.icc.fundamentos01.users.dtos.UserResponseDto;
 import ec.edu.ups.icc.fundamentos01.users.services.UserService;
 
 import java.util.List;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -40,24 +42,28 @@ public class UsersController {
     }
 
     @PostMapping
-    public UserResponseDto create(@Valid @RequestBody CreateUserDto dto) {
-        return service.create(dto);
+    public ResponseEntity<UserResponseDto> create(@Valid @RequestBody CreateUserDto dto) {
+        UserResponseDto created = service.create(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     @PutMapping("/{id}")
-    public UserResponseDto update(@PathVariable("id") int id,
+    public ResponseEntity<UserResponseDto> update(@PathVariable("id") int id,
                          @Valid @RequestBody UpdateUserDto dto) {
-        return service.update(id, dto);
+        UserResponseDto updated = service.update(id, dto);
+        return ResponseEntity.ok(updated);
     }
 
     @PatchMapping("/{id}")
-    public UserResponseDto partialUpdate(@PathVariable("id") int id,
+    public ResponseEntity<UserResponseDto> partialUpdate(@PathVariable("id") int id,
                                 @Valid @RequestBody PartialUpdateUserDto dto) {
-        return service.partialUpdate(id, dto);
+        UserResponseDto updated = service.partialUpdate(id, dto);
+        return ResponseEntity.ok(updated);
     }
 
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable("id") int id) {
+    public ResponseEntity<Void> delete(@PathVariable("id") int id) {
         service.delete(id);
+        return ResponseEntity.noContent().build();
     }
 }

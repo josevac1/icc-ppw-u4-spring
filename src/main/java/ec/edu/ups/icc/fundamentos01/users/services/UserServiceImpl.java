@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import ec.edu.ups.icc.fundamentos01.exception.domain.ConflictException;
+import ec.edu.ups.icc.fundamentos01.exception.domain.NotFoundException;
 import ec.edu.ups.icc.fundamentos01.users.dtos.CreateUserDto;
 import ec.edu.ups.icc.fundamentos01.users.dtos.PartialUpdateUserDto;
 import ec.edu.ups.icc.fundamentos01.users.dtos.UpdateUserDto;
@@ -25,10 +27,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<UserResponseDto> findAll() {
         return userRepo.findAll()
-            .stream()
-            .map(User::fromEntity)
-            .map(UserMapper::toResponse)
-            .toList();
+                .stream()
+                .map(User::fromEntity)
+                .map(UserMapper::toResponse)
+                .toList();
     }
 
     @Override
@@ -36,7 +38,7 @@ public class UserServiceImpl implements UserService {
         return userRepo.findById((long) id)
                 .map(User::fromEntity)
                 .map(UserMapper::toResponse)
-                .orElse(null);
+                .orElseThrow(() -> new NotFoundException("Usuario no encontrado con ID: " + id));
     }
 
     @Override
@@ -44,7 +46,7 @@ public class UserServiceImpl implements UserService {
 
         // Regla: email único
         if (userRepo.findByEmail(dto.email).isPresent()) {
-            throw new IllegalStateException("El email ya está registrado");
+            throw new ConflictException("El email " + dto.email + " ya está registrado");
         }
 
         User user = User.fromDto(dto);
@@ -57,31 +59,33 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserResponseDto update(int id, UpdateUserDto dto) {
         return userRepo.findById((long) id)
-            .map(User::fromEntity)
-            .map(user -> user.update(dto))
-            .map(User::toEntity)
-            .map(userRepo::save)
-            .map(User::fromEntity)
-            .map(UserMapper::toResponse)
-            .orElseThrow(() -> new IllegalStateException("User not found"));
+                .map(User::fromEntity)
+                .map(user -> user.update(dto))
+                .map(User::toEntity)
+                .map(userRepo::save)
+                .map(User::fromEntity)
+                .map(UserMapper::toResponse)
+                .orElseThrow(() -> new NotFoundException("Usuario no encontrado con ID: " + id));
     }
 
     @Override
     public UserResponseDto partialUpdate(int id, PartialUpdateUserDto dto) {
         return userRepo.findById((long) id)
-            .map(User::fromEntity)
-            .map(user -> user.partialUpdate(dto))
-            .map(User::toEntity)
-            .map(userRepo::save)
-            .map(User::fromEntity)
-            .map(UserMapper::toResponse)
-            .orElseThrow(() -> new IllegalStateException("User not found"));
+                .map(User::fromEntity)
+                .map(user -> user.partialUpdate(dto))
+                .map(User::toEntity)
+                .map(userRepo::save)
+                .map(User::fromEntity)
+                .map(UserMapper::toResponse)
+                .orElseThrow(() -> new NotFoundException("Usuario no encontrado con ID: " + id));
     }
 
     @Override
     public void delete(int id) {
         userRepo.findById((long) id)
-            .ifPresentOrElse(userRepo::delete,
-                () -> { throw new IllegalStateException("User not found"); });
+                .ifPresentOrElse(userRepo::delete,
+                        () -> {
+                            throw new NotFoundException("Usuario no encontrado con ID: " + id);
+                        });
     }
 }

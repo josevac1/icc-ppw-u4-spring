@@ -1,6 +1,8 @@
 package ec.edu.ups.icc.fundamentos01.products.controllers;
 
 import java.util.List;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -38,24 +40,28 @@ public class ProductsController {
 	}
 
 	@PostMapping
-	public ProductResponseDto create(@Valid @RequestBody CreateProductDto dto) {
-		return service.create(dto);
+	public ResponseEntity<ProductResponseDto> create(@Valid @RequestBody CreateProductDto dto) {
+		ProductResponseDto created = service.create(dto);
+		return ResponseEntity.status(HttpStatus.CREATED).body(created);
 	}
 
 	@PutMapping("/{id}")
-	public ProductResponseDto update(@PathVariable("id") int id,
+	public ResponseEntity<ProductResponseDto> update(@PathVariable("id") int id,
 			@Valid @RequestBody UpdateProductDto dto) {
-		return service.update(id, dto);
+		ProductResponseDto updated = service.update(id, dto);
+		return ResponseEntity.ok(updated);
 	}
 
 	@PatchMapping("/{id}")
-	public ProductResponseDto partialUpdate(@PathVariable("id") int id,
+	public ResponseEntity<ProductResponseDto> partialUpdate(@PathVariable("id") int id,
 			@Valid @RequestBody PartialUpdateProductDto dto) {
-		return service.partialUpdate(id, dto);
+		ProductResponseDto updated = service.partialUpdate(id, dto);
+		return ResponseEntity.ok(updated);
 	}
 
 	@DeleteMapping("/{id}")
-	public void delete(@PathVariable("id") int id) {
+	public ResponseEntity<Void> delete(@PathVariable("id") int id) {
 		service.delete(id);
+		return ResponseEntity.noContent().build();
 	}
 }
