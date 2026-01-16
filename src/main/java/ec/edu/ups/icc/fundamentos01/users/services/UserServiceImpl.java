@@ -8,6 +8,7 @@ import ec.edu.ups.icc.fundamentos01.exception.domain.ConflictException;
 import ec.edu.ups.icc.fundamentos01.exception.domain.NotFoundException;
 import ec.edu.ups.icc.fundamentos01.users.dtos.CreateUserDto;
 import ec.edu.ups.icc.fundamentos01.users.dtos.PartialUpdateUserDto;
+import ec.edu.ups.icc.fundamentos01.users.dtos.PasswordUsers;
 import ec.edu.ups.icc.fundamentos01.users.dtos.UpdateUserDto;
 import ec.edu.ups.icc.fundamentos01.users.dtos.UserResponseDto;
 import ec.edu.ups.icc.fundamentos01.users.entities.UserEntity;
@@ -87,5 +88,20 @@ public class UserServiceImpl implements UserService {
                         () -> {
                             throw new NotFoundException("Usuario no encontrado con ID: " + id);
                         });
+    }
+
+    @Override
+    public UserResponseDto passwordUser(int id, PasswordUsers dto) {
+        return userRepo.findById((long) id)
+                .map(User::fromEntity)
+                .map(user -> {
+                    user.setPassword(dto.password);
+                    return user;
+                })
+                .map(User::toEntity)
+                .map(userRepo::save)
+                .map(User::fromEntity)
+                .map(UserMapper::toResponse)
+                .orElseThrow(() -> new NotFoundException("Usuario no encontrado con ID: " + id));
     }
 }

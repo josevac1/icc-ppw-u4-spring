@@ -1,5 +1,6 @@
 package ec.edu.ups.icc.fundamentos01.products.dtos;
 
+
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -22,15 +23,21 @@ public class CreateProductDto {
     @DecimalMin(value = "0.0", inclusive = true, message = "El stock no puede ser negativo")
     public Integer stock;
 
+    @NotNull(message = "El ID del usuario es obligatorio")
+    public Long userId;
+
+    @NotNull(message = "Debe especificar al menos una categoría")
+    public Long categoryId; // Múltiples categorías
+
     // Getters
     public String getName() {
         return name;
     }
-    
+
     public String getDescription() {
         return description;
     }
-    
+
     public Double getPrice() {
         return price;
     }
@@ -38,16 +45,16 @@ public class CreateProductDto {
     public Integer getStock() {
         return stock;
     }
-    
+
     // Setters
     public void setName(String name) {
         this.name = name;
     }
-    
+
     public void setDescription(String description) {
         this.description = description;
     }
-    
+
     public void setPrice(Double price) {
         this.price = price;
     }
@@ -55,4 +62,22 @@ public class CreateProductDto {
     public void setStock(Integer stock) {
         this.stock = stock;
     }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+
+    public Long getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(Long categoryId) {
+        this.categoryId = categoryId;
+    }
+
+  
 }

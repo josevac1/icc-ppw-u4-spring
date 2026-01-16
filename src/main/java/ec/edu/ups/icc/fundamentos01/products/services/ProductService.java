@@ -6,6 +6,7 @@ import ec.edu.ups.icc.fundamentos01.products.dtos.CreateProductDto;
 import ec.edu.ups.icc.fundamentos01.products.dtos.PartialUpdateProductDto;
 import ec.edu.ups.icc.fundamentos01.products.dtos.ProductResponseDto;
 import ec.edu.ups.icc.fundamentos01.products.dtos.UpdateProductDto;
+import ec.edu.ups.icc.fundamentos01.products.dtos.validateProductsUpdate;
 
 public interface ProductService {
 
@@ -15,9 +16,19 @@ public interface ProductService {
 
     ProductResponseDto create(CreateProductDto dto);
 
-    ProductResponseDto update(int id, UpdateProductDto dto);
+    ProductResponseDto update(Long id, UpdateProductDto dto);
 
     ProductResponseDto partialUpdate(int id, PartialUpdateProductDto dto);
 
-    void delete(int id);
+    void delete(Long id);
+
+    boolean validarName(int id, String name);
+
+    ProductResponseDto secureProduc(int id, validateProductsUpdate dto);
+
+    ProductResponseDto findById(Long id);
+
+    List<ProductResponseDto> findByUserId(Long userId);
+
+    List<ProductResponseDto> findByCategoryId(Long categoryId);
 }

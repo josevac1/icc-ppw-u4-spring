@@ -1,190 +1,171 @@
 package ec.edu.ups.icc.fundamentos01.products.models;
 
-import java.time.LocalDateTime;
+import ec.edu.ups.icc.fundamentos01.Category.Entity.CategoryEntity;
 import ec.edu.ups.icc.fundamentos01.products.dtos.CreateProductDto;
 import ec.edu.ups.icc.fundamentos01.products.dtos.PartialUpdateProductDto;
-import ec.edu.ups.icc.fundamentos01.products.dtos.ProductResponseDto;
 import ec.edu.ups.icc.fundamentos01.products.dtos.UpdateProductDto;
 import ec.edu.ups.icc.fundamentos01.products.entities.ProductEntity;
+import ec.edu.ups.icc.fundamentos01.users.entities.UserEntity;
 
 public class Product {
 
-    private int id;
+    private Long id;
     private String name;
-    private String description;
     private Double price;
-    private Integer stock;
-    private LocalDateTime createdAt;
+    private int stock;
+    private String description;
 
-    public Product(int id, String name, String description, Double price, Integer stock) {
-        // Validaciones de reglas de negocio
-        if (name == null || name.isBlank()) {
-            throw new IllegalArgumentException("El nombre del producto es inválido");
-        }
+    // Constructores
+    public Product() {
+    }
 
-        if (price == null || price < 0) {
-            throw new IllegalArgumentException("El precio no puede ser negativo");
-        }
-
-        if (stock == null || stock < 0) {
-            throw new IllegalArgumentException("El stock no puede ser negativo");
-        }
-
-        this.id = id;
+    public Product(String name, Double price, String description) {
+        this.validateBusinessRules(name, price, description);
         this.name = name;
-        this.description = description;
         this.price = price;
-        this.stock = stock;
-        this.createdAt = LocalDateTime.now();
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
         this.description = description;
     }
 
-    public Double getPrice() {
-        return price;
-    }
-
-    public void setPrice(Double price) {
-        this.price = price;
-    }
-
-    public Integer getStock() {
-        return stock;
-    }
-
-    public void setStock(Integer stock) {
-        this.stock = stock;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
+    private void validateBusinessRules(String name, Double price, String description) {
+        if (name == null || name.trim().isEmpty()) {
+            throw new IllegalArgumentException("El nombre del producto es obligatorio");
+        }
+        if (price == null || price <= 0) {
+            throw new IllegalArgumentException("El precio debe ser mayor a 0");
+        }
+        if (description != null && description.length() > 500) {
+            throw new IllegalArgumentException("La descripción no puede superar 500 caracteres");
+        }
     }
 
     // ==================== FACTORY METHODS ====================
 
     /**
      * Crea un Product desde un DTO de creación
-     * @param dto DTO con datos del formulario
-     * @return instancia de Product para lógica de negocio
      */
     public static Product fromDto(CreateProductDto dto) {
-        return new Product(
-            0,  // id = 0 porque aún no existe en BD
-            dto.getName(),
-            dto.getDescription(),
-            dto.getPrice() != null ? dto.getPrice() : 0.0,
-            dto.getStock() != null ? dto.getStock() : 0
-        );
+        Product product = new Product(dto.name, dto.price, dto.description);
+        product.stock = dto.stock != null ? dto.stock : 0;
+        return product;
     }
 
     /**
      * Crea un Product desde una entidad persistente
-     * @param entity Entidad recuperada de la BD
-     * @return instancia de Product para lógica de negocio
      */
     public static Product fromEntity(ProductEntity entity) {
-        return new Product(
-            entity.getId().intValue(),
-            entity.getName(),
-            entity.getDescription(),
-            entity.getPrice(),
-            entity.getStock()
-        );
+        Product product = new Product(
+                entity.getName(),
+                entity.getPrice(),
+                entity.getDescription());
+        product.id = entity.getId();
+        return product;
     }
 
     // ==================== CONVERSION METHODS ====================
 
     /**
      * Convierte este Product a una entidad persistente
-     * @return ProductEntity lista para guardar en BD
+     * REQUIERE las entidades relacionadas como parámetros
      */
-    public ProductEntity toEntity() {
+    public ProductEntity toEntity(UserEntity owner, CategoryEntity category) {
         ProductEntity entity = new ProductEntity();
 
-        // Si ya tiene id, lo asignamos (para updates)
-        if (this.id > 0) {
-            entity.setId((long) this.id);
+        if (this.id != null && this.id > 0) {
+            entity.setId(this.id);
         }
 
         entity.setName(this.name);
+        entity.setPrice(this.price);
         entity.setDescription(this.description);
-        entity.setPrice(this.price != null ? this.price : 0.0);
-        entity.setStock(this.stock != null ? this.stock : 0);
+        entity.setStock(this.stock);
+
+        // Asignar relaciones
+        entity.setOwner(owner);
+        entity.setCategory(category);
+
         return entity;
     }
 
     /**
-     * Convierte este Product a un DTO de respuesta
-     * @return DTO sin información sensible
+     * Convierte este Product a una entidad persistente SIN relaciones
+     * Útil para operaciones donde owner/categoría no aplican o se asignan luego.
      */
-    public ProductResponseDto toResponseDto() {
-        ProductResponseDto dto = new ProductResponseDto();
-        dto.setId(this.id);
-        dto.setName(this.name);
-        dto.setDescription(this.description);
-        dto.setPrice(this.price);
-        dto.setStock(this.stock);
-        dto.setCreatedAt(this.createdAt.toString());
-        return dto;
+    public ProductEntity toEntity() {
+        ProductEntity entity = new ProductEntity();
+        if (this.id != null && this.id > 0) {
+            entity.setId(this.id);
+        }
+        entity.setName(this.name);
+        entity.setPrice(this.price);
+        entity.setDescription(this.description);
+        entity.setStock(this.stock);
+        return entity;
     }
 
-    // ==================== MUTATION METHODS ====================
-
+    /**
+     * Actualiza los campos modificables de este Product
+     */
     public Product update(UpdateProductDto dto) {
-        // Validar reglas de negocio antes de actualizar
-        if (dto.getPrice() != null && dto.getPrice() < 0) {
-            throw new IllegalArgumentException("El precio no puede ser negativo");
-        }
-        if (dto.getStock() != null && dto.getStock() < 0) {
-            throw new IllegalArgumentException("El stock no puede ser negativo");
-        }
-
+        this.validateBusinessRules(dto.name, dto.price, dto.description);
         this.name = dto.name;
-        this.description = dto.description;
         this.price = dto.price;
-        this.stock = dto.stock;
+        this.description = dto.description;
         return this;
     }
 
+    /**
+     * Actualización parcial: solo aplica campos no nulos del DTO.
+     */
     public Product partialUpdate(PartialUpdateProductDto dto) {
-        // Validar reglas de negocio antes de actualizar
-        if (dto.getPrice() != null && dto.getPrice() < 0) {
-            throw new IllegalArgumentException("El precio no puede ser negativo");
-        }
-        if (dto.getStock() != null && dto.getStock() < 0) {
-            throw new IllegalArgumentException("El stock no puede ser negativo");
-        }
-
-        if (dto.name != null) this.name = dto.name;
-        if (dto.description != null) this.description = dto.description;
-        if (dto.price != null) this.price = dto.price;
-        if (dto.stock != null) this.stock = dto.stock;
+        String newName = dto.name != null ? dto.name : this.name;
+        Double newPrice = dto.price != null ? dto.price : this.price;
+        String newDescription = dto.description != null ? dto.description : this.description;
+        this.validateBusinessRules(newName, newPrice, newDescription);
+        this.name = newName;
+        this.price = newPrice;
+        this.description = newDescription;
         return this;
     }
+
+    // Getters y setters
+    public Long getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public Double getPrice() {
+        return price;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setPrice(Double price) {
+        this.price = price;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public int getStock() {
+        return stock;
+    }
+
+    public void setStock(int stock) {
+        this.stock = stock;
+    }
+
 }

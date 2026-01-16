@@ -49,14 +49,14 @@ public class UsersController {
 
     @PutMapping("/{id}")
     public ResponseEntity<UserResponseDto> update(@PathVariable("id") int id,
-                         @Valid @RequestBody UpdateUserDto dto) {
+            @Valid @RequestBody UpdateUserDto dto) {
         UserResponseDto updated = service.update(id, dto);
         return ResponseEntity.ok(updated);
     }
 
     @PatchMapping("/{id}")
     public ResponseEntity<UserResponseDto> partialUpdate(@PathVariable("id") int id,
-                                @Valid @RequestBody PartialUpdateUserDto dto) {
+            @Valid @RequestBody PartialUpdateUserDto dto) {
         UserResponseDto updated = service.partialUpdate(id, dto);
         return ResponseEntity.ok(updated);
     }
@@ -66,4 +66,5 @@ public class UsersController {
         service.delete(id);
         return ResponseEntity.noContent().build();
     }
+
 }

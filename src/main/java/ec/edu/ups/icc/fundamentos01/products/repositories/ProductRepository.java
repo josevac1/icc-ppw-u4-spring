@@ -8,9 +8,17 @@ import org.springframework.stereotype.Repository;
 
 import ec.edu.ups.icc.fundamentos01.products.entities.ProductEntity;
 
+
 @Repository
 public interface ProductRepository extends JpaRepository<ProductEntity, Long> {
     Optional<ProductEntity> findByName(String name);
-    List<ProductEntity> findByNameContainingIgnoreCase(String name);
-    List<ProductEntity> findByPriceBetween(Double minPrice, Double maxPrice);
+
+    //// select * from products where user:id
+    List<ProductEntity> findByOwnerId(Long userId);
+    List<ProductEntity> findByCategoryId(Long categoryId);
+    List<ProductEntity> findByOwnerName(String name);
+    List<ProductEntity> findByCategoryName(String name);
+    List<ProductEntity> findByCategoryIdAndPriceGreaterThan(Long categoryId, Double price);
+    
+    
 }

@@ -22,6 +22,10 @@ public class UpdateProductDto {
     @DecimalMin(value = "0.0", inclusive = true, message = "El stock no puede ser negativo")
     public Integer stock;
 
+
+    @NotNull(message = "El ID de Categoria es oblogatorio")
+    public Long categoryId;
+
     // Getters
     public String getName() {
         return name;
