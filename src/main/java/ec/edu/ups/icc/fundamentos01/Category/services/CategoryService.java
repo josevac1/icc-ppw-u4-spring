@@ -3,6 +3,8 @@ package ec.edu.ups.icc.fundamentos01.Category.services;
 import java.util.List;
 import ec.edu.ups.icc.fundamentos01.Category.dto.CategoryResponseDTO;
 import ec.edu.ups.icc.fundamentos01.Category.dto.CategoryRequestDTO;
+import ec.edu.ups.icc.fundamentos01.Category.dto.CategoryUpdateDTO;
+import ec.edu.ups.icc.fundamentos01.Category.dto.CategoryPatchDTO;
 
 public interface CategoryService {
 
@@ -12,7 +14,9 @@ public interface CategoryService {
 
     CategoryResponseDTO findById(Long id);
 
-    void update(Long id, CategoryRequestDTO dto);
+    void update(Long id, CategoryUpdateDTO dto);
+
+    void partialUpdate(Long id, CategoryPatchDTO dto);
 
     void delete(Long id);
 }

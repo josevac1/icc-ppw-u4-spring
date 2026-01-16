@@ -121,6 +121,49 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    public List<ProductResponseDto> findByOwnerName(String ownerName) {
+        if (ownerName == null || ownerName.isBlank()) {
+            throw new BadRequestException("El nombre del propietario es obligatorio");
+        }
+
+        return productRepo.findByOwnerName(ownerName)
+                .stream()
+                .map(this::toResponseDto)
+                .toList();
+    }
+
+    @Override
+    public List<ProductResponseDto> findByCategoryName(String categoryName) {
+        if (categoryName == null || categoryName.isBlank()) {
+            throw new BadRequestException("El nombre de la categoría es obligatorio");
+        }
+
+        return productRepo.findByCategoryName(categoryName)
+                .stream()
+                .map(this::toResponseDto)
+                .toList();
+    }
+
+    @Override
+    public List<ProductResponseDto> findByCategoryIdAndMinPrice(Long categoryId, Double minPrice) {
+        if (categoryId == null || categoryId <= 0) {
+            throw new BadRequestException("El ID de la categoría es inválido");
+        }
+        if (minPrice == null || minPrice < 0) {
+            throw new BadRequestException("El precio mínimo debe ser 0 o mayor");
+        }
+
+        if (!categoryRepo.existsById(categoryId)) {
+            throw new NotFoundException("Categoría no encontrada con ID: " + categoryId);
+        }
+
+        return productRepo.findByCategoryIdAndPriceGreaterThan(categoryId, minPrice)
+                .stream()
+                .map(this::toResponseDto)
+                .toList();
+    }
+
+    @Override
     public ProductResponseDto update(Long id, UpdateProductDto dto) {
 
         // 1. BUSCAR PRODUCTO EXISTENTE
@@ -130,6 +173,16 @@ public class ProductServiceImpl implements ProductService {
         // 2. VALIDAR NUEVA CATEGORÍA (si cambió)
         CategoryEntity newCategory = categoryRepo.findById(dto.categoryId)
                 .orElseThrow(() -> new NotFoundException("Categoría no encontrada con ID: " + dto.categoryId));
+
+        // 2.1 Validar nombre único si cambió
+        if (dto.name != null && !existing.getName().equalsIgnoreCase(dto.name)) {
+            productRepo.findByName(dto.name)
+                .ifPresent(other -> {
+                    if (!other.getId().equals(id)) {
+                        throw new ConflictException("Ya existe un producto con el nombre: " + dto.name);
+                    }
+                });
+        }
 
         // 3. ACTUALIZAR USANDO DOMINIO
         Product product = Product.fromEntity(existing);

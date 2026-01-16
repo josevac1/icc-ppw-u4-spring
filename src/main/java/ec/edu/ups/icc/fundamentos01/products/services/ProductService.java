@@ -31,4 +31,11 @@ public interface ProductService {
     List<ProductResponseDto> findByUserId(Long userId);
 
     List<ProductResponseDto> findByCategoryId(Long categoryId);
+
+    // Búsquedas adicionales
+    List<ProductResponseDto> findByOwnerName(String ownerName);
+
+    List<ProductResponseDto> findByCategoryName(String categoryName);
+
+    List<ProductResponseDto> findByCategoryIdAndMinPrice(Long categoryId, Double minPrice);
 }

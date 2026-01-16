@@ -5,6 +5,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import ec.edu.ups.icc.fundamentos01.Category.dto.CategoryResponseDTO;
 import ec.edu.ups.icc.fundamentos01.Category.dto.CategoryRequestDTO;
+import ec.edu.ups.icc.fundamentos01.Category.dto.CategoryUpdateDTO;
+import ec.edu.ups.icc.fundamentos01.Category.dto.CategoryPatchDTO;
 import ec.edu.ups.icc.fundamentos01.Category.services.CategoryService;
 
 import org.springframework.http.ResponseEntity;
@@ -14,7 +16,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import jakarta.validation.Valid;
 
 import java.util.List;
 
@@ -60,13 +64,23 @@ public class CategoriaController {
     }
 
     /**
-     * Actualizar una categoría
+     * Actualizar una categoría (reemplazo completo)
      * PUT /api/categories/{id}
      */
     @PutMapping("/{id}")
-    public ResponseEntity<String> update(@PathVariable Long id, @RequestBody CategoryRequestDTO dto) {
+    public ResponseEntity<String> update(@PathVariable Long id, @Valid @RequestBody CategoryUpdateDTO dto) {
         service.update(id, dto);
         return ResponseEntity.ok("Categoría actualizada exitosamente");
+    }
+
+    /**
+     * Actualizar parcialmente una categoría
+     * PATCH /api/categories/{id}
+     */
+    @PatchMapping("/{id}")
+    public ResponseEntity<String> partialUpdate(@PathVariable Long id, @Valid @RequestBody CategoryPatchDTO dto) {
+        service.partialUpdate(id, dto);
+        return ResponseEntity.ok("Categoría actualizada parcialmente");
     }
 
     /**

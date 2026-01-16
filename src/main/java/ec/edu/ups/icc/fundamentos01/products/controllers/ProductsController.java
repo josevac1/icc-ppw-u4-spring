@@ -11,9 +11,13 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.PatchMapping;
 import ec.edu.ups.icc.fundamentos01.products.dtos.CreateProductDto;
 import ec.edu.ups.icc.fundamentos01.products.dtos.ProductResponseDto;
 import ec.edu.ups.icc.fundamentos01.products.dtos.UpdateProductDto;
+import ec.edu.ups.icc.fundamentos01.products.dtos.PartialUpdateProductDto;
+import ec.edu.ups.icc.fundamentos01.products.dtos.ValidateProductsNameDto;
+import ec.edu.ups.icc.fundamentos01.products.dtos.validateProductsUpdate;
 import ec.edu.ups.icc.fundamentos01.products.services.ProductService;
 import jakarta.validation.Valid;
 
@@ -71,5 +75,52 @@ public class ProductsController {
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         service.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    // ============== ENDPOINTS ADICIONALES ==============
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<ProductResponseDto> partialUpdate(
+            @PathVariable Long id,
+            @Valid @RequestBody PartialUpdateProductDto dto
+    ) {
+        ProductResponseDto updated = service.partialUpdate(id.intValue(), dto);
+        return ResponseEntity.ok(updated);
+    }
+
+    @PostMapping("/validate-name")
+    public ResponseEntity<String> validateName(@Valid @RequestBody ValidateProductsNameDto dto) {
+        service.validarName(dto.id, dto.name);
+        return ResponseEntity.ok("Nombre válido");
+    }
+
+    @PostMapping("/{id}/secure-update")
+    public ResponseEntity<ProductResponseDto> secureUpdate(
+            @PathVariable Long id,
+            @Valid @RequestBody validateProductsUpdate dto
+    ) {
+        ProductResponseDto updated = service.secureProduc(id.intValue(), dto);
+        return ResponseEntity.ok(updated);
+    }
+
+    @GetMapping("/owner/name/{name}")
+    public ResponseEntity<List<ProductResponseDto>> findByOwnerName(@PathVariable String name) {
+        List<ProductResponseDto> products = service.findByOwnerName(name);
+        return ResponseEntity.ok(products);
+    }
+
+    @GetMapping("/category/name/{name}")
+    public ResponseEntity<List<ProductResponseDto>> findByCategoryName(@PathVariable String name) {
+        List<ProductResponseDto> products = service.findByCategoryName(name);
+        return ResponseEntity.ok(products);
+    }
+
+    @GetMapping("/category/{categoryId}/minprice/{price}")
+    public ResponseEntity<List<ProductResponseDto>> findByCategoryAndMinPrice(
+            @PathVariable Long categoryId,
+            @PathVariable Double price
+    ) {
+        List<ProductResponseDto> products = service.findByCategoryIdAndMinPrice(categoryId, price);
+        return ResponseEntity.ok(products);
     }
 }

@@ -7,6 +7,8 @@ import ec.edu.ups.icc.fundamentos01.Category.Entity.CategoryEntity;
 import ec.edu.ups.icc.fundamentos01.Category.Entity.Repository.CategoryRepositorio;
 import ec.edu.ups.icc.fundamentos01.Category.dto.CategoryResponseDTO;
 import ec.edu.ups.icc.fundamentos01.Category.dto.CategoryRequestDTO;
+import ec.edu.ups.icc.fundamentos01.Category.dto.CategoryUpdateDTO;
+import ec.edu.ups.icc.fundamentos01.Category.dto.CategoryPatchDTO;
 import ec.edu.ups.icc.fundamentos01.exception.domain.BadRequestException;
 import ec.edu.ups.icc.fundamentos01.exception.domain.ConflictException;
 import ec.edu.ups.icc.fundamentos01.exception.domain.NotFoundException;
@@ -60,7 +62,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public void update(Long id, CategoryRequestDTO dto) {
+    public void update(Long id, CategoryUpdateDTO dto) {
         if (id == null || id <= 0) {
             throw new BadRequestException("El ID de la categoría debe ser válido");
         }
@@ -79,6 +81,34 @@ public class CategoryServiceImpl implements CategoryService {
 
         entity.setName(dto.name);
         entity.setDescription(dto.description);
+        repository.save(entity);
+    }
+
+    @Override
+    public void partialUpdate(Long id, CategoryPatchDTO dto) {
+        if (id == null || id <= 0) {
+            throw new BadRequestException("El ID de la categoría debe ser válido");
+        }
+
+        CategoryEntity entity = repository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Categoría no encontrada con ID: " + id));
+
+        // Actualizar solo campos no nulos
+        if (dto.name != null) {
+            if (dto.name.isBlank()) {
+                throw new BadRequestException("El nombre de la categoría no puede estar vacío");
+            }
+            // Verificar si el nuevo nombre ya existe en otra categoría
+            if (!entity.getName().equalsIgnoreCase(dto.name) && repository.existsByName(dto.name)) {
+                throw new ConflictException("Ya existe una categoría con el nombre: " + dto.name);
+            }
+            entity.setName(dto.name);
+        }
+
+        if (dto.description != null) {
+            entity.setDescription(dto.description);
+        }
+
         repository.save(entity);
     }
 

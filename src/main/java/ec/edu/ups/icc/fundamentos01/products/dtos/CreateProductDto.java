@@ -9,18 +9,18 @@ import jakarta.validation.constraints.Size;
 public class CreateProductDto {
 
     @NotBlank(message = "El nombre es obligatorio")
-    @Size(min = 3, max = 100, message = "El nombre debe tener entre 3 y 100 caracteres")
+    @Size(min = 3, max = 150, message = "El nombre debe tener entre 3 y 150 caracteres")
     public String name;
 
     @Size(max = 500, message = "La descripción no puede exceder 500 caracteres")
     public String description;
 
     @NotNull(message = "El precio es obligatorio")
-    @DecimalMin(value = "0.0", inclusive = true, message = "El precio no puede ser negativo")
+    @DecimalMin(value = "0.0", inclusive = false, message = "El precio debe ser mayor a 0")
     public Double price;
 
     @NotNull(message = "El stock es obligatorio")
-    @DecimalMin(value = "0.0", inclusive = true, message = "El stock no puede ser negativo")
+    @jakarta.validation.constraints.Min(value = 0, message = "El stock no puede ser negativo")
     public Integer stock;
 
     @NotNull(message = "El ID del usuario es obligatorio")
