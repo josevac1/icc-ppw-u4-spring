@@ -137,7 +137,7 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new NotFoundException("Usuario no se encontró o no existe"));
 
         // Consultar productos con filtros a nivel de base de datos
-        return productRepository.findByOwWithFilters(userId, name, minPrice, maxPrice, categoryId)
+        return productRepository.findByOwnerWithFilters(userId, name, minPrice, maxPrice, categoryId)
                 .stream()
                 .map(productService::convertEntityToResponseDto)
                 .toList();
