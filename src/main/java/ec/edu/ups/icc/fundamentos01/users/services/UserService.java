@@ -26,4 +26,24 @@ public interface UserService {
     UserResponseDto passwordUser(int id, PasswordUsers dto);
 
     List<ProductResponseDto> getProductsByUserId(Long userId);
+
+    /**
+     * Obtiene los productos de un usuario aplicando filtros opcionales
+     * a nivel de base de datos.
+     * 
+     * @param userId ID del usuario propietario de los productos
+     * @param name Nombre del producto (búsqueda parcial, optional)
+     * @param minPrice Precio mínimo (optional)
+     * @param maxPrice Precio máximo (optional)
+     * @param categoryId ID de la categoría (optional)
+     * @return Lista de productos filtrados
+     */
+    List<ProductResponseDto> getProductsByUserIdWithFilters(
+        Long userId,
+        String name,
+        Double minPrice,
+        Double maxPrice,
+        Long categoryId
+    );
 }
+

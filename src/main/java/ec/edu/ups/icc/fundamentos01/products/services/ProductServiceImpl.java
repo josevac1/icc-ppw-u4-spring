@@ -73,7 +73,7 @@ public class ProductServiceImpl implements ProductService {
         dto.setCategories(list);
         return dto;
     }
-    
+
     @Override
     public List<ProductResponseDto> findAll() {
         return productRepo.findAll()
@@ -198,7 +198,7 @@ public class ProductServiceImpl implements ProductService {
         // 4. ACTUALIZAR ENTIDAD
         ProductEntity updated = product.toEntity(existing.getOwner());
         updated.setId(id); // Asegurar que mantiene el ID
-        
+
         // IMPORTANTE: Limpiar categorías existentes y asignar nuevas
         updated.clearCategories();
         updated.setCategories(newCategories);
@@ -240,7 +240,7 @@ public class ProductServiceImpl implements ProductService {
 
         ProductEntity updated = product.toEntity(entity.getOwner());
         updated.setId(entity.getId());
-        
+
         // Mantener las categorías existentes
         updated.setCategories(entity.getCategories());
 
@@ -291,29 +291,21 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public ProductResponseDto create(CreateProductDto dto) {
 
-        // 1. VALIDAR EXISTENCIA DE RELACIONES
         UserEntity owner = userRepo.findById(dto.userId)
                 .orElseThrow(() -> new NotFoundException("Usuario no encontrado con ID: " + dto.userId));
-
-        // 2. VALIDAR Y OBTENER CATEGORÍAS
         Set<CategoryEntity> categories = validateAndGetCategories(dto.categoryIds);
-
-        // Regla: nombre único
         if (productRepo.findByName(dto.name).isPresent()) {
             throw new IllegalStateException("El nombre del producto ya está registrado");
         }
-
-        // 3. CREAR MODELO DE DOMINIO
         Product product = Product.fromDto(dto);
-
-        // 4. CREAR ENTIDAD CON RELACIONES N:N
         ProductEntity entity = product.toEntity(owner);
         entity.setCategories(categories);
-
-        // 5. PERSISTIR
         ProductEntity saved = productRepo.save(entity);
-
-        // 6. CONVERTIR A DTO DE RESPUESTA
         return toResponseDto(saved);
+    }
+
+    @Override
+    public ProductResponseDto convertEntityToResponseDto(ProductEntity entity) {
+        return toResponseDto(entity);
     }
 }

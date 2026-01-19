@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestParam;
 import jakarta.validation.Valid;
 
 @RestController
@@ -49,6 +50,39 @@ public class UsersController {
     @GetMapping("/{id}/products")
     public ResponseEntity<List<ProductResponseDto>> getProductsByUserId(@PathVariable("id") int id) {
         List<ProductResponseDto> products = productService.findByUserId(Long.valueOf(id));
+        return ResponseEntity.ok(products);
+    }
+
+    /**
+     * Endpoint: GET /api/users/{id}/products-v2
+     * 
+     * Obtiene los productos de un usuario específico con filtros opcionales.
+     * Los filtros se aplican a nivel de base de datos para mejor rendimiento.
+     * 
+     * Parámetros de consulta opcionales:
+     * - name: Nombre del producto (búsqueda parcial)
+     * - minPrice: Precio mínimo
+     * - maxPrice: Precio máximo
+     * - categoryId: ID de la categoría
+     * 
+     * Ejemplo: GET /api/users/5/products-v2?name=laptop&minPrice=500&maxPrice=2000&categoryId=3
+     * 
+     * @param id ID del usuario
+     * @param name Nombre del producto (opcional)
+     * @param minPrice Precio mínimo (opcional)
+     * @param maxPrice Precio máximo (opcional)
+     * @param categoryId ID de la categoría (opcional)
+     * @return Lista de productos que cumplen con los criterios
+     */
+    @GetMapping("/{id}/products-v2")
+    public ResponseEntity<List<ProductResponseDto>> getProductsByUserIdWithFilters(
+            @PathVariable("id") Long id,
+            @RequestParam(value = "name", required = false) String name,
+            @RequestParam(value = "minPrice", required = false) Double minPrice,
+            @RequestParam(value = "maxPrice", required = false) Double maxPrice,
+            @RequestParam(value = "categoryId", required = false) Long categoryId) {
+        
+        List<ProductResponseDto> products = service.getProductsByUserIdWithFilters(id, name, minPrice, maxPrice, categoryId);
         return ResponseEntity.ok(products);
     }
 

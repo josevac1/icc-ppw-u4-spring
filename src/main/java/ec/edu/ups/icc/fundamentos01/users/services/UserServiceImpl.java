@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import ec.edu.ups.icc.fundamentos01.exception.domain.ConflictException;
 import ec.edu.ups.icc.fundamentos01.exception.domain.NotFoundException;
 import ec.edu.ups.icc.fundamentos01.products.dtos.ProductResponseDto;
+import ec.edu.ups.icc.fundamentos01.products.repositories.ProductRepository;
 import ec.edu.ups.icc.fundamentos01.products.services.ProductService;
 import ec.edu.ups.icc.fundamentos01.users.dtos.CreateUserDto;
 import ec.edu.ups.icc.fundamentos01.users.dtos.PartialUpdateUserDto;
@@ -23,10 +24,12 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepo;
     private final ProductService productService;
+    private final ProductRepository productRepository;
 
-    public UserServiceImpl(UserRepository userRepo, ProductService productService) {
+    public UserServiceImpl(UserRepository userRepo, ProductService productService, ProductRepository productRepository) {
         this.userRepo = userRepo;
         this.productService = productService;
+        this.productRepository = productRepository;
     }
 
     @Override
@@ -119,5 +122,24 @@ public class UserServiceImpl implements UserService {
         // Delegar al servicio de productos
         return productService.findByUserId(userId);
 
+    }
+
+    @Override
+    public List<ProductResponseDto> getProductsByUserIdWithFilters(
+            Long userId,
+            String name,
+            Double minPrice,
+            Double maxPrice,
+            Long categoryId) {
+        
+        // Validar existencia del usuario
+        userRepo.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Usuario no se encontró o no existe"));
+
+        // Consultar productos con filtros a nivel de base de datos
+        return productRepository.findByOwWithFilters(userId, name, minPrice, maxPrice, categoryId)
+                .stream()
+                .map(productService::convertEntityToResponseDto)
+                .toList();
     }
 }

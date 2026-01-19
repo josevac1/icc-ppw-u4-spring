@@ -28,14 +28,22 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long> {
      * Encuentra productos que tienen una categoría con nombre específico
      */
     List<ProductEntity> findByCategoriesName(String categoryName);
+
     
-    /**
-     * Consulta personalizada: productos con TODAS las categorías especificadas
-     */
-    @Query("SELECT p FROM ProductEntity p " +
-           "WHERE SIZE(p.categories) >= :categoryCount " +
-           "AND :categoryCount = " +
-           "(SELECT COUNT(c) FROM p.categories c WHERE c.id IN :categoryIds)")
-    List<ProductEntity> findByAllCategories(@Param("categoryIds") List<Long> categoryIds,
-                                          @Param("categoryCount") long categoryCount);
+    @Query("SELECT DISTINCT p FROM ProductEntity p"+
+        "LEFT JOIN p.categories c"+
+        "WHERE p.owner.id = :userId"+
+            "AND (:name  IS NULL OR LOWER(p.name) LIKE LOWER(CONCAT('%', :name, '%')))"+
+            "AND (:minPrice  IS NULL OR p.price >= :minPrice)"+
+            "AND (:maxPrice  IS NULL OR p.price <= :maxPrice)"+
+            "AND (:categoryId  IS NULL OR c.id = :categoryId)"
+    )
+    List<ProductEntity> findByOwWithFilters(
+        @Param("userId") Long userId,
+        @Param("name") String name,
+        @Param("minPrice") Double minPrice,
+        @Param("maxPrice") Double maxPrice,
+        @Param("categoryId") Long categoryId
+    );
+
 }

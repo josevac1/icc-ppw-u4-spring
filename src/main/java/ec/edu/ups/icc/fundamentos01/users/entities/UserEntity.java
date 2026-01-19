@@ -9,7 +9,6 @@ import jakarta.persistence.Table;
 import java.util.HashSet;
 import java.util.Set;
 
-import ec.edu.ups.icc.fundamentos01.Category.Entity.CategoryEntity;
 import ec.edu.ups.icc.fundamentos01.core.entities.BaseModel;
 import ec.edu.ups.icc.fundamentos01.products.entities.ProductEntity;
 

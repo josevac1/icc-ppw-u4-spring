@@ -7,6 +7,7 @@ import ec.edu.ups.icc.fundamentos01.products.dtos.PartialUpdateProductDto;
 import ec.edu.ups.icc.fundamentos01.products.dtos.ProductResponseDto;
 import ec.edu.ups.icc.fundamentos01.products.dtos.UpdateProductDto;
 import ec.edu.ups.icc.fundamentos01.products.dtos.validateProductsUpdate;
+import ec.edu.ups.icc.fundamentos01.products.entities.ProductEntity;
 
 public interface ProductService {
 
@@ -38,4 +39,13 @@ public interface ProductService {
     List<ProductResponseDto> findByCategoryName(String categoryName);
 
     List<ProductResponseDto> findByCategoryIdAndMinPrice(Long categoryId, Double minPrice);
+
+    /**
+     * Convierte una entidad ProductEntity a ProductResponseDto.
+     * Método público para uso en otras capas de la aplicación.
+     * 
+     * @param entity La entidad a convertir
+     * @return DTO con la información del producto
+     */
+    ProductResponseDto convertEntityToResponseDto(ProductEntity entity);
 }
