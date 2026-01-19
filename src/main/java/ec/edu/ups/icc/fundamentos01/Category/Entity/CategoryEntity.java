@@ -1,9 +1,11 @@
 package ec.edu.ups.icc.fundamentos01.Category.Entity;
 
 import ec.edu.ups.icc.fundamentos01.core.entities.BaseModel;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import ec.edu.ups.icc.fundamentos01.products.entities.ProductEntity;
+import jakarta.persistence.*;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "categories")
@@ -13,6 +15,15 @@ public class CategoryEntity extends BaseModel {
     
     @Column(length = 500)
     private String description;
+
+    // ============== RELACIÓN BIDIRECCIONAL N:N ==============
+    
+    /**
+     * Relación inversa con Product
+     * mappedBy = "categories" hace referencia al atributo en ProductEntity
+     */
+    @ManyToMany(mappedBy = "categories", fetch = FetchType.LAZY)
+    private Set<ProductEntity> products = new HashSet<>();
 
     // ==================== GETTERS AND SETTERS ====================
     
@@ -30,5 +41,23 @@ public class CategoryEntity extends BaseModel {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public Set<ProductEntity> getProducts() {
+        return products;
+    }
+
+    public void setProducts(Set<ProductEntity> products) {
+        this.products = products != null ? products : new HashSet<>();
+    }
+
+    // ============== MÉTODOS DE CONVENIENCIA ==============
+    
+    public void addProduct(ProductEntity product) {
+        this.products.add(product);
+    }
+
+    public void removeProduct(ProductEntity product) {
+        this.products.remove(product);
     }
 }

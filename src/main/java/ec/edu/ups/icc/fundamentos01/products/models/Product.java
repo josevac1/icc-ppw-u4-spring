@@ -1,8 +1,8 @@
 package ec.edu.ups.icc.fundamentos01.products.models;
 
-import ec.edu.ups.icc.fundamentos01.Category.Entity.CategoryEntity;
 import ec.edu.ups.icc.fundamentos01.products.dtos.CreateProductDto;
 import ec.edu.ups.icc.fundamentos01.products.dtos.PartialUpdateProductDto;
+import ec.edu.ups.icc.fundamentos01.products.dtos.ProductResponseDto;
 import ec.edu.ups.icc.fundamentos01.products.dtos.UpdateProductDto;
 import ec.edu.ups.icc.fundamentos01.products.entities.ProductEntity;
 import ec.edu.ups.icc.fundamentos01.users.entities.UserEntity;
@@ -65,9 +65,9 @@ public class Product {
 
     /**
      * Convierte este Product a una entidad persistente
-     * REQUIERE las entidades relacionadas como parámetros
+     * Solo asigna el owner, las categorías se asignan por separado
      */
-    public ProductEntity toEntity(UserEntity owner, CategoryEntity category) {
+    public ProductEntity toEntity(UserEntity owner) {
         ProductEntity entity = new ProductEntity();
 
         if (this.id != null && this.id > 0) {
@@ -79,16 +79,15 @@ public class Product {
         entity.setDescription(this.description);
         entity.setStock(this.stock);
 
-        // Asignar relaciones
+        // Asignar relación 1:N con usuario
         entity.setOwner(owner);
-        entity.setCategory(category);
 
         return entity;
     }
 
     /**
      * Convierte este Product a una entidad persistente SIN relaciones
-     * Útil para operaciones donde owner/categoría no aplican o se asignan luego.
+     * Útil para operaciones donde owner/categorías no aplican o se asignan luego.
      */
     public ProductEntity toEntity() {
         ProductEntity entity = new ProductEntity();
@@ -125,6 +124,18 @@ public class Product {
         this.price = newPrice;
         this.description = newDescription;
         return this;
+    }
+
+    public ProductResponseDto toResponseDto() {
+        ProductResponseDto dto = new ProductResponseDto();
+        dto.setId(this.id);
+        dto.setName(this.name);
+        dto.setDescription(this.description != null ? this.description : "");
+        dto.setPrice(this.price);
+        dto.setStock(this.stock);
+        // Nota: el mapeo de owner, categorías y auditoría
+        // se realiza desde ProductServiceImpl usando ProductEntity.
+        return dto;
     }
 
     // Getters y setters

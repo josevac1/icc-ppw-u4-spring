@@ -6,6 +6,8 @@ import ec.edu.ups.icc.fundamentos01.users.dtos.PartialUpdateUserDto;
 import ec.edu.ups.icc.fundamentos01.users.dtos.UserResponseDto;
 
 import ec.edu.ups.icc.fundamentos01.users.services.UserService;
+import ec.edu.ups.icc.fundamentos01.products.services.ProductService;
+import ec.edu.ups.icc.fundamentos01.products.dtos.ProductResponseDto;
 
 import java.util.List;
 import org.springframework.http.HttpStatus;
@@ -26,9 +28,11 @@ import jakarta.validation.Valid;
 public class UsersController {
 
     private final UserService service;
+    private final ProductService productService;
 
-    public UsersController(UserService service) {
+    public UsersController(UserService service, ProductService productService) {
         this.service = service;
+        this.productService = productService;
     }
 
     @GetMapping
@@ -39,6 +43,13 @@ public class UsersController {
     @GetMapping("/{id}")
     public UserResponseDto findOne(@PathVariable("id") int id) {
         return service.findOne(id);
+    }
+
+    // Subcolección: productos de un usuario
+    @GetMapping("/{id}/products")
+    public ResponseEntity<List<ProductResponseDto>> getProductsByUserId(@PathVariable("id") int id) {
+        List<ProductResponseDto> products = productService.findByUserId(Long.valueOf(id));
+        return ResponseEntity.ok(products);
     }
 
     @PostMapping

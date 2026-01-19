@@ -1,6 +1,9 @@
 package ec.edu.ups.icc.fundamentos01.products.services;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+
 import org.springframework.stereotype.Service;
 
 import ec.edu.ups.icc.fundamentos01.Category.Entity.CategoryEntity;
@@ -39,37 +42,38 @@ public class ProductServiceImpl implements ProductService {
 
     private ProductResponseDto toResponseDto(ProductEntity entity) {
         ProductResponseDto dto = new ProductResponseDto();
-        dto.id = entity.getId();
-        dto.name = entity.getName();
-        dto.price = entity.getPrice();
-        dto.description = entity.getDescription();
-        dto.stock = entity.getStock();
-        
-        // Solo asignar fechas si existen
-        if (entity.getCreatedAt() != null) {
-            dto.createdAt = entity.getCreatedAt();
-        }
-        if (entity.getUpdatedAt() != null) {
-            dto.updatedAt = entity.getUpdatedAt();
-        }
+
+        // Campos básicos
+        dto.setId(entity.getId());
+        dto.setName(entity.getName());
+        dto.setPrice(entity.getPrice());
+        dto.setDescription(entity.getDescription() != null ? entity.getDescription() : "");
+        dto.setStock(entity.getStock());
+
+        // Asignar fechas de auditoría
+        dto.setCreatedAt(entity.getCreatedAt());
+        dto.setUpdatedAt(entity.getUpdatedAt());
 
         // Información del usuario (propietario)
-        ProductResponseDto.UserSummaryDto userDto = new ProductResponseDto.UserSummaryDto();
-        userDto.id = entity.getOwner().getId();
-        userDto.name = entity.getOwner().getName();
-        userDto.email = entity.getOwner().getEmail();
-        dto.user = userDto;
+        ProductResponseDto.UserSummaryDto ownerDto = new ProductResponseDto.UserSummaryDto();
+        ownerDto.setId(entity.getOwner().getId());
+        ownerDto.setName(entity.getOwner().getName());
+        ownerDto.setEmail(entity.getOwner().getEmail());
 
-        // Información de la categoría
-        ProductResponseDto.CategoryResponseDto categoryDto = new ProductResponseDto.CategoryResponseDto();
-        categoryDto.id = entity.getCategory().getId();
-        categoryDto.name = entity.getCategory().getName();
-        categoryDto.description = entity.getCategory().getDescription();
-        dto.category = categoryDto;
+        List<CategoryResponseDto> list = new java.util.ArrayList<>();
+        for (CategoryEntity cat : entity.getCategories()) {
+            CategoryResponseDto categoryDto = new CategoryResponseDto();
+            categoryDto.setId(cat.getId());
+            categoryDto.setName(cat.getName());
+            categoryDto.setDescription(cat.getDescription() != null ? cat.getDescription() : "");
+            list.add(categoryDto);
+        }
 
+        dto.setUser(ownerDto);
+        dto.setCategories(list);
         return dto;
     }
-
+    
     @Override
     public List<ProductResponseDto> findAll() {
         return productRepo.findAll()
@@ -114,7 +118,7 @@ public class ProductServiceImpl implements ProductService {
             throw new NotFoundException("Categoría no encontrada con ID: " + categoryId);
         }
 
-        return productRepo.findByCategoryId(categoryId)
+        return productRepo.findByCategoriesId(categoryId)
                 .stream()
                 .map(this::toResponseDto)
                 .toList();
@@ -126,8 +130,10 @@ public class ProductServiceImpl implements ProductService {
             throw new BadRequestException("El nombre del propietario es obligatorio");
         }
 
-        return productRepo.findByOwnerName(ownerName)
+        // Buscar todos los productos y filtrar por nombre del propietario
+        return productRepo.findAll()
                 .stream()
+                .filter(p -> p.getOwner().getName().equalsIgnoreCase(ownerName))
                 .map(this::toResponseDto)
                 .toList();
     }
@@ -138,7 +144,7 @@ public class ProductServiceImpl implements ProductService {
             throw new BadRequestException("El nombre de la categoría es obligatorio");
         }
 
-        return productRepo.findByCategoryName(categoryName)
+        return productRepo.findByCategoriesName(categoryName)
                 .stream()
                 .map(this::toResponseDto)
                 .toList();
@@ -157,8 +163,10 @@ public class ProductServiceImpl implements ProductService {
             throw new NotFoundException("Categoría no encontrada con ID: " + categoryId);
         }
 
-        return productRepo.findByCategoryIdAndPriceGreaterThan(categoryId, minPrice)
+        // Buscar productos que tengan esta categoría y el precio mínimo especificado
+        return productRepo.findByCategoriesId(categoryId)
                 .stream()
+                .filter(p -> p.getPrice() >= minPrice)
                 .map(this::toResponseDto)
                 .toList();
     }
@@ -170,31 +178,46 @@ public class ProductServiceImpl implements ProductService {
         ProductEntity existing = productRepo.findById(id)
                 .orElseThrow(() -> new NotFoundException("Producto no encontrado con ID: " + id));
 
-        // 2. VALIDAR NUEVA CATEGORÍA (si cambió)
-        CategoryEntity newCategory = categoryRepo.findById(dto.categoryId)
-                .orElseThrow(() -> new NotFoundException("Categoría no encontrada con ID: " + dto.categoryId));
+        // 2. VALIDAR Y OBTENER NUEVAS CATEGORÍAS
+        Set<CategoryEntity> newCategories = validateAndGetCategories(dto.categoryIds);
 
         // 2.1 Validar nombre único si cambió
         if (dto.name != null && !existing.getName().equalsIgnoreCase(dto.name)) {
             productRepo.findByName(dto.name)
-                .ifPresent(other -> {
-                    if (!other.getId().equals(id)) {
-                        throw new ConflictException("Ya existe un producto con el nombre: " + dto.name);
-                    }
-                });
+                    .ifPresent(other -> {
+                        if (!other.getId().equals(id)) {
+                            throw new ConflictException("Ya existe un producto con el nombre: " + dto.name);
+                        }
+                    });
         }
 
         // 3. ACTUALIZAR USANDO DOMINIO
         Product product = Product.fromEntity(existing);
         product.update(dto);
 
-        // 4. CONVERTIR A ENTIDAD MANTENIENDO OWNER ORIGINAL
-        ProductEntity updated = product.toEntity(existing.getOwner(), newCategory);
+        // 4. ACTUALIZAR ENTIDAD
+        ProductEntity updated = product.toEntity(existing.getOwner());
         updated.setId(id); // Asegurar que mantiene el ID
+        
+        // IMPORTANTE: Limpiar categorías existentes y asignar nuevas
+        updated.clearCategories();
+        updated.setCategories(newCategories);
 
         // 5. PERSISTIR Y RESPONDER
         ProductEntity saved = productRepo.save(updated);
         return toResponseDto(saved);
+    }
+
+    private Set<CategoryEntity> validateAndGetCategories(Set<Long> categoryIds) {
+        Set<CategoryEntity> categories = new HashSet<>();
+
+        for (Long categoryId : categoryIds) {
+            CategoryEntity category = categoryRepo.findById(categoryId)
+                    .orElseThrow(() -> new NotFoundException("Categoría no encontrada: " + categoryId));
+            categories.add(category);
+        }
+
+        return categories;
     }
 
     @Override
@@ -207,23 +230,23 @@ public class ProductServiceImpl implements ProductService {
         productRepo.delete(product);
     }
 
-
-
     @Override
     public ProductResponseDto partialUpdate(int id, PartialUpdateProductDto dto) {
         ProductEntity entity = productRepo.findById((long) id)
                 .orElseThrow(() -> new NotFoundException("Producto no encontrado con ID: " + id));
-        
+
         Product product = Product.fromEntity(entity);
         product.partialUpdate(dto);
-        
-        ProductEntity updated = product.toEntity(entity.getOwner(), entity.getCategory());
+
+        ProductEntity updated = product.toEntity(entity.getOwner());
         updated.setId(entity.getId());
         
+        // Mantener las categorías existentes
+        updated.setCategories(entity.getCategories());
+
         ProductEntity saved = productRepo.save(updated);
         return toResponseDto(saved);
     }
-
 
     @Override
     public boolean validarName(int id, String name) {
@@ -257,8 +280,9 @@ public class ProductServiceImpl implements ProductService {
         if (dto.description != null)
             product.setDescription(dto.description);
 
-        ProductEntity updated = product.toEntity(entity.getOwner(), entity.getCategory());
+        ProductEntity updated = product.toEntity(entity.getOwner());
         updated.setId(entity.getId());
+        updated.setCategories(entity.getCategories());
         ProductEntity saved = productRepo.save(updated);
 
         return toResponseDto(saved);
@@ -271,24 +295,25 @@ public class ProductServiceImpl implements ProductService {
         UserEntity owner = userRepo.findById(dto.userId)
                 .orElseThrow(() -> new NotFoundException("Usuario no encontrado con ID: " + dto.userId));
 
-        CategoryEntity category = categoryRepo.findById(dto.categoryId)
-                .orElseThrow(() -> new NotFoundException("Categoría no encontrada con ID: " + dto.categoryId));
+        // 2. VALIDAR Y OBTENER CATEGORÍAS
+        Set<CategoryEntity> categories = validateAndGetCategories(dto.categoryIds);
 
         // Regla: nombre único
         if (productRepo.findByName(dto.name).isPresent()) {
             throw new IllegalStateException("El nombre del producto ya está registrado");
         }
 
-        // 2. CREAR MODELO DE DOMINIO
+        // 3. CREAR MODELO DE DOMINIO
         Product product = Product.fromDto(dto);
 
-        // 3. CONVERTIR A ENTIDAD CON RELACIONES
-        ProductEntity entity = product.toEntity(owner, category);
+        // 4. CREAR ENTIDAD CON RELACIONES N:N
+        ProductEntity entity = product.toEntity(owner);
+        entity.setCategories(categories);
 
-        // 4. PERSISTIR
+        // 5. PERSISTIR
         ProductEntity saved = productRepo.save(entity);
 
-        // 5. CONVERTIR A DTO DE RESPUESTA
+        // 6. CONVERTIR A DTO DE RESPUESTA
         return toResponseDto(saved);
     }
 }

@@ -4,6 +4,7 @@ import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import java.util.Set;
 
 public class UpdateProductDto {
 
@@ -22,9 +23,9 @@ public class UpdateProductDto {
     @jakarta.validation.constraints.Min(value = 0, message = "El stock no puede ser negativo")
     public Integer stock;
 
-
-    @NotNull(message = "El ID de Categoria es oblogatorio")
-    public Long categoryId;
+    @NotNull(message = "Debe especificar al menos una categoría")
+    @Size(min = 1, message = "El producto debe tener al menos una categoría")
+    public Set<Long> categoryIds; // Múltiples categorías
 
     // Getters
     public String getName() {
@@ -42,6 +43,10 @@ public class UpdateProductDto {
     public Integer getStock() {
         return stock;
     }
+
+    public Set<Long> getCategoryIds() {
+        return categoryIds;
+    }
     
     // Setters
     public void setName(String name) {
@@ -58,5 +63,9 @@ public class UpdateProductDto {
 
     public void setStock(Integer stock) {
         this.stock = stock;
+    }
+
+    public void setCategoryIds(Set<Long> categoryIds) {
+        this.categoryIds = categoryIds;
     }
 }

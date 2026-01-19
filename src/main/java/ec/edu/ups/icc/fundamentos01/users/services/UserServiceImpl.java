@@ -6,6 +6,8 @@ import org.springframework.stereotype.Service;
 
 import ec.edu.ups.icc.fundamentos01.exception.domain.ConflictException;
 import ec.edu.ups.icc.fundamentos01.exception.domain.NotFoundException;
+import ec.edu.ups.icc.fundamentos01.products.dtos.ProductResponseDto;
+import ec.edu.ups.icc.fundamentos01.products.services.ProductService;
 import ec.edu.ups.icc.fundamentos01.users.dtos.CreateUserDto;
 import ec.edu.ups.icc.fundamentos01.users.dtos.PartialUpdateUserDto;
 import ec.edu.ups.icc.fundamentos01.users.dtos.PasswordUsers;
@@ -20,9 +22,11 @@ import ec.edu.ups.icc.fundamentos01.users.repositories.UserRepository;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepo;
+    private final ProductService productService;
 
-    public UserServiceImpl(UserRepository userRepo) {
+    public UserServiceImpl(UserRepository userRepo, ProductService productService) {
         this.userRepo = userRepo;
+        this.productService = productService;
     }
 
     @Override
@@ -103,5 +107,17 @@ public class UserServiceImpl implements UserService {
                 .map(User::fromEntity)
                 .map(UserMapper::toResponse)
                 .orElseThrow(() -> new NotFoundException("Usuario no encontrado con ID: " + id));
+    }
+
+    // Par crear los users de la parctica que tenemos
+    @Override
+    public List<ProductResponseDto> getProductsByUserId(Long userId) {
+        // Validar existencia del usuario
+        userRepo.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Usuario no se encontró o no existe"));
+
+        // Delegar al servicio de productos
+        return productService.findByUserId(userId);
+
     }
 }

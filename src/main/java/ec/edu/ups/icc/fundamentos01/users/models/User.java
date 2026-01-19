@@ -8,7 +8,7 @@ import ec.edu.ups.icc.fundamentos01.users.entities.UserEntity;
 
 public class User {
 
-     private int id;
+    private int id;
     private String name;
     private String email;
     private String password;
@@ -75,36 +75,37 @@ public class User {
 
     /**
      * Crea un User desde un DTO de creación
+     * 
      * @param dto DTO con datos del formulario
      * @return instancia de User para lógica de negocio
      */
     public static User fromDto(CreateUserDto dto) {
         return new User(
-            0,                // id = 0 porque aún no existe en BD
-            dto.getName(),
-            dto.getEmail(),
-            dto.getPassword()
-        );
+                0, // id = 0 porque aún no existe en BD
+                dto.getName(),
+                dto.getEmail(),
+                dto.getPassword());
     }
 
     /**
      * Crea un User desde una entidad persistente
+     * 
      * @param entity Entidad recuperada de la BD
      * @return instancia de User para lógica de negocio
      */
     public static User fromEntity(UserEntity entity) {
         return new User(
-            entity.getId().intValue(),
-            entity.getName(),
-            entity.getEmail(),
-            entity.getPassword()
-        );
+                entity.getId().intValue(),
+                entity.getName(),
+                entity.getEmail(),
+                entity.getPassword());
     }
 
     // ==================== CONVERSION METHODS ====================
 
     /**
      * Convierte este User a una entidad persistente
+     * 
      * @return UserEntity lista para guardar en BD
      */
     public UserEntity toEntity() {
@@ -123,6 +124,7 @@ public class User {
 
     /**
      * Convierte este User a un DTO de respuesta
+     * 
      * @return DTO sin información sensible
      */
     public UserResponseDto toResponseDto() {
@@ -133,18 +135,22 @@ public class User {
         return dto; // sin password
     }
 
-
     public User update(UpdateUserDto dto) {
-    this.name = dto.name;
-    this.email = dto.email;
-    this.password = dto.password;
-    return this;
-}
+        this.name = dto.name;
+        this.email = dto.email;
+        this.password = dto.password;
+        return this;
+    }
 
-public User partialUpdate(PartialUpdateUserDto dto) {
-    if (dto.name != null) this.name = dto.name;
-    if (dto.email != null) this.email = dto.email;
-    if (dto.password != null) this.password = dto.password;
-    return this;
-}
+    public User partialUpdate(PartialUpdateUserDto dto) {
+        if (dto.name != null)
+            this.name = dto.name;
+        if (dto.email != null)
+            this.email = dto.email;
+        if (dto.password != null)
+            this.password = dto.password;
+        return this;
+    }
+
+    
 }

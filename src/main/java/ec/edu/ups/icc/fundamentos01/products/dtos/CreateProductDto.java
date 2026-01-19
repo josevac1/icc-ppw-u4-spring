@@ -1,5 +1,6 @@
 package ec.edu.ups.icc.fundamentos01.products.dtos;
 
+import java.util.Set;
 
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
@@ -19,7 +20,6 @@ public class CreateProductDto {
     @DecimalMin(value = "0.0", inclusive = false, message = "El precio debe ser mayor a 0")
     public Double price;
 
-    @NotNull(message = "El stock es obligatorio")
     @jakarta.validation.constraints.Min(value = 0, message = "El stock no puede ser negativo")
     public Integer stock;
 
@@ -27,7 +27,8 @@ public class CreateProductDto {
     public Long userId;
 
     @NotNull(message = "Debe especificar al menos una categoría")
-    public Long categoryId; // Múltiples categorías
+    @Size(min = 1, message = "El producto debe tener al menos una categoría")
+    public Set<Long> categoryIds; // Múltiples categorías
 
     // Getters
     public String getName() {
@@ -71,13 +72,12 @@ public class CreateProductDto {
         this.userId = userId;
     }
 
-    public Long getCategoryId() {
-        return categoryId;
+    public Set<Long> getCategoryIds() {
+        return categoryIds;
     }
 
-    public void setCategoryId(Long categoryId) {
-        this.categoryId = categoryId;
+    public void setCategoryIds(Set<Long> categoryIds) {
+        this.categoryIds = categoryIds;
     }
 
-  
 }

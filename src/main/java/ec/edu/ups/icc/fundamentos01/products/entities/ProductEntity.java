@@ -1,6 +1,10 @@
 package ec.edu.ups.icc.fundamentos01.products.entities;
 
 import jakarta.persistence.*;
+
+import java.util.HashSet;
+import java.util.Set;
+
 import ec.edu.ups.icc.fundamentos01.Category.Entity.CategoryEntity;
 import ec.edu.ups.icc.fundamentos01.core.entities.BaseModel;
 import ec.edu.ups.icc.fundamentos01.users.entities.UserEntity;
@@ -32,16 +36,26 @@ public class ProductEntity extends BaseModel {
         this.stock = stock;
     }
 
-           /// atributos relacionados 
-    /// con usuarios donde un 1 usuarios puedes tener vario productos 
-    
+    /// atributos relacionados con usuarios donde un 1 usuarios puedes tener
+    /// vario productos
+
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private UserEntity owner;
 
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id", nullable = false)
-    private CategoryEntity category;
+    // ============== NUEVA RELACIÓN N:N ==============
+
+    /**
+     * Relación Many-to-Many con Category
+     * Un producto puede tener múltiples categorías
+     * Una categoría puede estar en múltiples productos
+     */
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "product_categories", // Tabla intermedia
+            joinColumns = @JoinColumn(name = "product_id"), // FK hacia products
+            inverseJoinColumns = @JoinColumn(name = "category_id") // FK hacia categories
+    )
+    private Set<CategoryEntity> categories = new HashSet<>();
 
     // ==================== GETTERS AND SETTERS ====================
     public String getName() {
@@ -84,12 +98,35 @@ public class ProductEntity extends BaseModel {
         this.owner = owner;
     }
 
-    public CategoryEntity getCategory() {
-        return category;
+    public Set<CategoryEntity> getCategories() {
+        return categories;
     }
 
-    public void setCategory(CategoryEntity category) {
-        this.category = category;
-    } 
+    public void setCategories(Set<CategoryEntity> categories) {
+        this.categories = categories != null ? categories : new HashSet<>();
+    }
 
+    // ============== MÉTODOS DE CONVENIENCIA ==============
+
+    /**
+     * Agrega una categoría al producto
+     */
+    public void addCategory(CategoryEntity category) {
+        this.categories.add(category);
+    }
+
+    /**
+     * Remueve una categoría del producto
+     */
+    public void removeCategory(CategoryEntity category) {
+        this.categories.remove(category);
+    }
+
+    /**
+     * Limpia todas las categorías
+     */
+    public void clearCategories() {
+        this.categories.clear();
+
+    }
 }

@@ -2,6 +2,7 @@ package ec.edu.ups.icc.fundamentos01.users.services;
 
 import java.util.List;
 
+import ec.edu.ups.icc.fundamentos01.products.dtos.ProductResponseDto;
 import ec.edu.ups.icc.fundamentos01.users.dtos.CreateUserDto;
 import ec.edu.ups.icc.fundamentos01.users.dtos.PartialUpdateUserDto;
 import ec.edu.ups.icc.fundamentos01.users.dtos.PasswordUsers;
@@ -9,7 +10,7 @@ import ec.edu.ups.icc.fundamentos01.users.dtos.UpdateUserDto;
 import ec.edu.ups.icc.fundamentos01.users.dtos.UserResponseDto;
 
 public interface UserService {
-    
+
     List<UserResponseDto> findAll();
 
     UserResponseDto findOne(int id);
@@ -23,4 +24,6 @@ public interface UserService {
     void delete(int id);
 
     UserResponseDto passwordUser(int id, PasswordUsers dto);
+
+    List<ProductResponseDto> getProductsByUserId(Long userId);
 }
